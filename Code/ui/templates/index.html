@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chinese Contract Analyzer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+            --glass-blur: blur(16px);
+            --primary: #0071e3;
+            --text-main: #1d1d1f;
+            --text-secondary: #86868b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(-45deg, #f5f7fa, #c3cfe2, #e0eafc, #cfdef3);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            margin: 0;
+            position: relative;
+            overflow-x: hidden;
+            color: var(--text-main);
+        }
+
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Ambient floating shapes */
+        .bg-shape {
+            position: absolute;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.7;
+            animation: floatShape 20s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .shape-1 {
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(135deg, rgba(0, 113, 227, 0.4), rgba(64, 156, 255, 0.2));
+            top: -150px;
+            left: -150px;
+            animation-delay: 0s;
+        }
+
+        .shape-2 {
+            width: 600px;
+            height: 600px;
+            background: linear-gradient(135deg, rgba(52, 199, 89, 0.3), rgba(0, 200, 150, 0.1));
+            bottom: -200px;
+            right: -100px;
+            animation-duration: 25s;
+        }
+
+        .shape-3 {
+            width: 400px;
+            height: 400px;
+            background: linear-gradient(135deg, rgba(142, 142, 147, 0.3), rgba(200, 200, 200, 0.1));
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-duration: 30s;
+        }
+
+        @keyframes floatShape {
+            0% {
+                transform: translate(0, 0) rotate(0deg) scale(1);
+            }
+
+            50% {
+                transform: translate(40px, 30px) rotate(10deg) scale(1.05);
+            }
+
+            100% {
+                transform: translate(-20px, 50px) rotate(-10deg) scale(0.95);
+            }
+        }
+
+        /* Container framework */
+        .container {
+            width: 100%;
+            max-width: 1500px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            padding: 0 2rem;
+            margin-top: 5rem;
+            margin-bottom: 2rem;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 1;
+            align-items: stretch;
+        }
+
+        @media(min-width: 992px) {
+            .container {
+                flex-direction: row;
+                align-items: flex-start;
+            }
+        }
+
+        /* Nav */
+        nav {
+            position: absolute;
+            top: -3.5rem;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--text-main);
+            font-weight: 500;
+            padding: 10px 24px;
+            border-radius: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        nav a:hover {
+            background: rgba(255, 255, 255, 0.7);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* Glass Panels */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+            padding: 2.5rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-panel:hover {
+            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.12);
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Form Container */
+        .form-container {
+            flex: 0 0 420px;
+            max-width: 420px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 1.5rem;
+        }
+
+        .header img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .description {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-main);
+            margin-top: 1.5rem;
+        }
+
+        select,
+        input[type="file"] {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            font-size: 1rem;
+            color: var(--text-main);
+            transition: all 0.3s ease;
+            outline: none;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        select:focus,
+        input[type="file"]:focus {
+            background: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.2);
+        }
+
+        button[type="submit"] {
+            margin-top: 2.5rem;
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(0, 113, 227, 0.9) 0%, rgba(0, 91, 181, 0.9) 100%);
+            backdrop-filter: blur(10px);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 14px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 6px 16px rgba(0, 113, 227, 0.25);
+        }
+
+        button[type="submit"]:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 24px rgba(0, 113, 227, 0.35);
+        }
+
+        .legend {
+            margin-top: 2.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            font-size: 0.9rem;
+            flex-wrap: wrap;
+        }
+
+        .legend b {
+            font-weight: 600;
+            margin-right: 5px;
+        }
+
+        .badge-legend {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .badge-unenforceable {
+            background: rgba(255, 59, 48, 0.1);
+            color: #FF3B30;
+            border: 1px solid rgba(255, 59, 48, 0.2);
+        }
+
+        .badge-enforceable {
+            background: rgba(52, 199, 89, 0.1);
+            color: #34C759;
+            border: 1px solid rgba(52, 199, 89, 0.2);
+        }
+
+        /* Results Container */
+        .results-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: calc(100vh - 12rem);
+            min-height: 600px;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .results-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-main);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #fff;
+            transform: translateY(-1px);
+        }
+
+        .copy-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .results-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        /* Custom Scrollbar */
+        .results-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .results-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .results-content::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+        }
+
+        .results-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .analysis-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
+            margin-bottom: 2rem;
+        }
+
+        .summary-card {
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 16px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .summary-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .summary-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .clause-card {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(255, 255, 255, 1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .clause-card:hover {
+            transform: scale(1.01) translateY(-4px);
+            box-shadow: 0 12px 30px rgba(31, 38, 135, 0.08);
+            border-color: rgba(255, 255, 255, 1);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .clause-unenforceable {
+            border-left: 4px solid #FF3B30;
+        }
+
+        .clause-enforceable {
+            border-left: 4px solid #34C759;
+        }
+
+        .clause-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .clause-text {
+            font-size: 1.05rem;
+            font-weight: 500;
+            line-height: 1.5;
+            color: var(--text-main);
+        }
+
+        .clause-badges {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .risk-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .risk-high {
+            background: #FF3B30;
+            color: white;
+        }
+
+        .risk-medium {
+            background: #FF9500;
+            color: white;
+        }
+
+        .risk-low {
+            background: #34C759;
+            color: white;
+        }
+
+        .clause-details {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            background: rgba(0, 0, 0, 0.02);
+            padding: 1rem;
+            border-radius: 12px;
+        }
+
+        .clause-details strong {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .improvement-box {
+            margin-top: 1rem;
+            background: rgba(0, 113, 227, 0.05);
+            padding: 1rem;
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+            color: var(--text-main);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .analyzing-status {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0, 113, 227, 0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s infinite linear;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .empty-state {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            text-align: center;
+            opacity: 0.7;
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1rem;
+            stroke-width: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+    <div class="bg-shape shape-3"></div>
+
+    <div class="container">
+        <nav>
+            <a href="/about">About Developer & Team</a>
+        </nav>
+
+        <!-- Form Panel -->
+        <div class="glass-panel form-container">
+            <div class="header">
+                <h2>Chinese Contract Nerd</h2>
+            </div>
+
+            <p class="description">
+                AI-powered premium analysis of Chinese legal agreements. Effortlessly identify unreasonable contracts
+                and unconscionable clauses.
+            </p>
+
+            <form id="analysis-form" enctype="multipart/form-data">
+                <label for="jurisdiction">Jurisdiction (司法管辖区):</label>
+                <select id="jurisdiction" name="jurisdiction" required>
+                    <option value="" disabled selected>-- Select --</option>
+                    <option value="National (全国)">National (全国)</option>
+                    <option value="Beijing (北京)">Beijing (北京)</option>
+                    <option value="Shanghai (上海)">Shanghai (上海)</option>
+                    <option value="Guangdong (广东)">Guangdong (广东)</option>
+                    <option value="Hefei (合肥)">Hefei (合肥)</option>
+                </select>
+
+                <label for="contractType">Contract Type (合同类型):</label>
+                <select id="contractType" name="contractType" required>
+                    <option value="" disabled selected>-- Select --</option>
+                    <option value="Employment">Employment</option>
+                    <option value="Rental">Rental</option>
+                </select>
+
+                <label for="contract">Document (PDF):</label>
+                <input type="file" id="contract" name="contract" accept="application/pdf" required>
+
+                <button type="submit">Analyze Contract (分析合同)</button>
+            </form>
+
+            <div class="legend">
+                <b>Legend:</b>
+                <span class="badge-legend badge-unenforceable">Unenforceable (不可执行)</span>
+                <span class="badge-legend badge-enforceable">Enforceable (可执行)</span>
+            </div>
+        </div>
+
+        <!-- Results Panel -->
+        <div class="glass-panel results-container">
+            <div class="results-header">
+                <h2>Analysis Results</h2>
+                <button class="copy-btn" id="copy-results" title="Copy all results">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <rect x="8" y="8" width="12" height="12" rx="2" />
+                        <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
+                    </svg>
+                    Copy
+                </button>
+            </div>
+
+            <div class="results-content" id="result">
+                <div class="empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    <h3>Ready for Analysis</h3>
+                    <p>Upload a contract to view AI-generated bilingual insights (English & 中文).</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("analysis-form").onsubmit = async function (event) {
+            event.preventDefault();
+            const jurisdiction = document.getElementById("jurisdiction").value;
+            const contractType = document.getElementById("contractType").value;
+            const contractFile = document.getElementById("contract").files[0];
+
+            if (!jurisdiction || !contractType || !contractFile) {
+                showError("Please select all required fields.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("jurisdiction", jurisdiction);
+            formData.append("contractType", contractType);
+            formData.append("contract", contractFile);
+
+            showLoading();
+
+            try {
+                const response = await fetch("/analyze", { method: "POST", body: formData });
+                if (!response.ok) throw new Error(`Analysis failed: ${response.status}`);
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                showError(error.message || "An error occurred during analysis.");
+            }
+        };
+
+        function showLoading() {
+            document.getElementById("result").innerHTML = `
+                <div class="analyzing-status">
+                    <div class="spinner"></div>
+                    <h3>AI is analyzing your contract...</h3>
+                    <p>Extracting clauses and assessing risk bilingual context.</p>
+                </div>
+            `;
+        }
+
+        function showError(message) {
+            document.getElementById("result").innerHTML = `
+                <div class="clause-card clause-unenforceable">
+                    <div class="clause-header">
+                        <div class="clause-text">Analysis Error</div>
+                    </div>
+                    <div class="clause-details">
+                        <p>${message}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayResults(data) {
+            let resultHTML = '';
+
+            if (data.metadata) {
+                resultHTML += `
+                    <div class="analysis-summary">
+                        <div class="summary-card">
+                            <div class="summary-value">${data.metadata.clause_count}</div>
+                            <div class="summary-label">Total Clauses</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-value" style="color:#FF3B30">${data.metadata.unenforceable_count}</div>
+                            <div class="summary-label">Risky/Unenforceable</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-value" style="font-size:1.1rem; line-height:1.5">${data.metadata.jurisdiction.split(' ')[0]}</div>
+                            <div class="summary-label">Jurisdiction</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (data.clauses && data.clauses.length > 0) {
+                data.clauses.forEach(clause => {
+                    const isUnenforceable = clause.classification && clause.classification.includes('Unenforceable');
+                    const cssClass = isUnenforceable ? 'clause-unenforceable' : 'clause-enforceable';
+
+                    // Determine risk level badge
+                    let riskBadge = '';
+                    if (clause.risk_tier) {
+                        const riskLower = clause.risk_tier.toLowerCase();
+                        const riskClass = riskLower.includes('high') || riskLower.includes('高风险') ? 'risk-high' :
+                            riskLower.includes('medium') || riskLower.includes('中风险') ? 'risk-medium' :
+                                'risk-low';
+                        riskBadge = `<span class="risk-badge ${riskClass}">${clause.risk_tier}</span>`;
+                    }
+
+                    resultHTML += `
+                        <div class="clause-card ${cssClass}">
+                            <div class="clause-header">
+                                <div class="clause-text">"${clause.text}"</div>
+                                <div class="clause-badges">${riskBadge}</div>
+                            </div>
+                            <div class="clause-details">
+                                <p><strong>Regulation(s):</strong> ${clause.details?.regulations || 'None'}</p>
+                                <p><strong>Classification:</strong> ${clause.classification || 'Not specified'}</p>
+                                <p><strong>Explanation:</strong> ${clause.details?.explanation || 'No explanation provided'}</p>
+                                ${clause.details?.linguistic_traits && !clause.details.linguistic_traits.includes('Not applicable') ?
+                            `<p><strong>Linguistic Traits:</strong> ${clause.details.linguistic_traits}</p>` : ''}
+                            </div>
+                            ${clause.details?.improvement_guidance && !clause.details.improvement_guidance.includes('No changes') && !clause.details.improvement_guidance.includes('无需修改') ?
+                            `<div class="improvement-box">
+                                    <strong>Improvement Guidance:</strong><br>
+                                    ${clause.details.improvement_guidance}
+                                </div>` : ''}
+                        </div>
+                    `;
+                });
+            } else {
+                resultHTML += `
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                             <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                             <line x1="12" y1="9" x2="12" y2="13"></line>
+                             <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                        <h3>No Clauses Found</h3>
+                        <p>The AI didn't return extracted clauses for this document.</p>
+                    </div>
+                `;
+            }
+            document.getElementById("result").innerHTML = resultHTML;
+        }
+
+        document.getElementById("copy-results").addEventListener("click", function () {
+            const results = document.getElementById("result").innerText;
+            navigator.clipboard.writeText(results).then(() => {
+                const btn = this;
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = 'Copied!';
+                setTimeout(() => { btn.innerHTML = originalHTML; }, 2000);
+            });
+        });
+    </script>
+</body>
+
+</html>
