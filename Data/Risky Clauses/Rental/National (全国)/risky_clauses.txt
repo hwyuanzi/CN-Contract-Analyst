@@ -1,0 +1,5 @@
+Lexical Ambiguity: 词汇模糊
+Syntactic Ambiguity: 语法模糊
+Undue Generality: 过分宽泛
+Redundancy: 冗余
+Combination: 组合

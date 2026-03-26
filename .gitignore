@@ -1,0 +1,33 @@
+# Ignore virtual environment
+venv/
+
+# Ignore archive folders
+Code/base/archive/
+Code/ui/archive/
+
+# Ignore python-generated folders
+**/__pycache__/
+
+
+# Ignore pkl files
+*.pkl
+
+Code/test.py
+
+# Ignore environment variables
+.env
+
+# Ignore system files
+.DS_Store
+.idea/
+
+# Ignore local virtual environments
+.venv/
+
+# Ignore user uploads and local test assets
+uploads/
+test_contracts/
+
+# Ignore Office Temp Files
+~$*
+~*.tmp
