@@ -81,7 +81,7 @@ def analyze():
             law_path      = legal_resources['regulations'],
             risky_clauses = legal_resources['risky_clauses'],
             model         = os.environ.get("LLM_MODEL", "deepseek-chat"),
-            role          = "You are an experienced Chinese contract analyst and legal expert. Please analyze whether the following contract clauses have potential legal risks, ambiguity or unconscionable terminology.",
+            role          = "user",
             api_base      = os.environ.get("OPENAI_API_BASE", "https://api.deepseek.com"),
             api_key       = os.environ.get("OPENAI_API_KEY", "YOUR_API_KEY_HERE"),
             temperature   = 0.3,
@@ -91,6 +91,7 @@ def analyze():
         print(f"Analysis completed in {time.time() - analysis_start:.2f}s")
 
         # Parse enhanced output format (Bilingual loose matching)
+        import re
         clauses = []
         current_clause = None
 
@@ -99,54 +100,91 @@ def analyze():
             if not line:
                 continue
 
-            # Lenient clause start matching (e.g. "Clause:", "Clause 1:", "条款:", "### Clause")
+            # Lenient clause start matching
             if 'Clause:' in line or '条款:' in line or line.startswith('### Clause'):
                 if current_clause and current_clause['text']:
                     clauses.append(current_clause)
 
                 # Initialize a new clause dictionary
                 current_clause = {
-                    'number': len(clauses) + 1,  # Simple incremental fallback
+                    'number': len(clauses) + 1,
                     'text': '',
-                    'classification': None,
-                    'risk_tier': None,
+                    'classification': '',
+                    'risk_tier': '',
                     'details': {
-                        'regulations': None,
-                        'linguistic_traits': None,
-                        'explanation': None,
-                        'improvement_guidance': None
-                    }
+                        'regulations': '',
+                        'linguistic_traits': '',
+                        'explanation': '',
+                        'improvement_guidance': ''
+                    },
+                    'current_field': 'text'
                 }
 
-                # Try to extract the literal text from the same line if it exists
-                if ':' in line:
-                    text_part = line.split(':', 1)[1].strip().strip('"').strip("'")
+                if ':' in line or '：' in line:
+                    normalized_line = line.replace('：', ':')
+                    text_part = normalized_line.split(':', 1)[1].strip().strip('"').strip("'")
                     if text_part:
                         current_clause['text'] = text_part
 
             elif current_clause:
-                # Lenient field detection for bilingual outputs
                 line_lower = line.lower()
-                if ('regulation' in line_lower or '法规' in line_lower) and ':' in line:
-                    current_clause['details']['regulations'] = line.split(':', 1)[1].strip()
-                elif ('classification' in line_lower or '分类' in line_lower) and ':' in line:
-                    classification = line.split(':', 1)[1].strip()
-                    current_clause['classification'] = classification
-                    current_clause['is_unenforceable'] = ('unenforceable' in classification.lower() or '不可执行' in classification)
-                elif ('risk tier' in line_lower or '风险' in line_lower) and ':' in line:
-                    current_clause['risk_tier'] = line.split(':', 1)[1].strip()
-                elif ('explanation' in line_lower or '解释' in line_lower or 'reasoning' in line_lower) and ':' in line:
-                    current_clause['details']['explanation'] = line.split(':', 1)[1].strip()
-                elif ('improvement' in line_lower or 'guidance' in line_lower or '建议' in line_lower) and ':' in line:
-                    current_clause['details']['improvement_guidance'] = line.split(':', 1)[1].strip()
-                elif ('linguistic' in line_lower or '语言' in line_lower) and ':' in line:
-                    current_clause['details']['linguistic_traits'] = line.split(':', 1)[1].strip()
-                elif not current_clause['text'] and not ':' in line:
-                    # If we just saw "Clause:" on the previous line and this line is plain text
-                    current_clause['text'] = line.strip('"').strip("'")
+                is_new_field = False
+                
+                # Check for standard field markers
+                if ':' in line or '：' in line:
+                    normalized_line = line.replace('：', ':')
+                    field_part = normalized_line.split(':', 1)[0].strip()
+                    content_part = normalized_line.split(':', 1)[1].strip()
+                    
+                    if len(field_part) < 60:
+                        field_lower = field_part.lower()
+                        matched_field = None
+                        
+                        if 'regulation' in field_lower or '法规' in field_lower or '法律' in field_lower:
+                            matched_field = 'regulations'
+                        elif 'classification' in field_lower or '分类' in field_lower or '定性' in field_lower:
+                            matched_field = 'classification'
+                            current_clause['is_unenforceable'] = ('unenforceable' in content_part.lower() or '不可执行' in content_part)
+                        elif 'risk' in field_lower or '风险' in field_lower or 'tier' in field_lower:
+                            matched_field = 'risk_tier'
+                        elif 'explanation' in field_lower or '解释' in field_lower or 'reasoning' in field_lower or '分析' in field_lower or '说明' in field_lower:
+                            matched_field = 'explanation'
+                        elif 'improvement' in field_lower or 'guidance' in field_lower or '建议' in field_lower or '修改' in field_lower:
+                            matched_field = 'improvement_guidance'
+                        elif 'linguistic' in field_lower or '语言' in field_lower or 'trait' in field_lower or '缺陷' in field_lower:
+                            matched_field = 'linguistic_traits'
+                            
+                        if matched_field:
+                            is_new_field = True
+                            current_clause['current_field'] = matched_field
+                            
+                            if matched_field in ['classification', 'risk_tier']:
+                                current_clause[matched_field] = content_part
+                            else:
+                                current_clause['details'][matched_field] = content_part
+
+                if not is_new_field:
+                    # Append it robustly to the current field
+                    curr_field = current_clause.get('current_field')
+                    if curr_field == 'text' and not current_clause['text']:
+                        current_clause['text'] = line.strip('"').strip("'")
+                    elif curr_field in ['classification', 'risk_tier']:
+                        current_clause[curr_field] = (current_clause[curr_field] + ' ' + line).strip()
+                    elif curr_field in current_clause['details']:
+                        existing = current_clause['details'][curr_field]
+                        separator = '<br>' if existing else ''
+                        current_clause['details'][curr_field] = existing + separator + line
 
         if current_clause and current_clause.get('text'):
             clauses.append(current_clause)
+            
+        # Clean up output formatting logic centrally
+        for c in clauses:
+            # Clean up regulations bullet numbering and remove "None (无)" text when empty
+            if c['details'].get('regulations'):
+                c['details']['regulations'] = re.sub(r'^(?:\d+[\.、\s]+|(?:[一二三四五六七八九十百千万]+)[\.、\s]+|(?:\([0-9]+\))|(?:\（[0-9一二三四五六七八九十]+\）))', '', c['details']['regulations']).strip()
+                if c['details']['regulations'].lower() in ['none', 'none (无)', '无', 'none/无']:
+                    c['details']['regulations'] = ''
 
         # Generate analysis metadata
         analysis_metadata = {
@@ -172,9 +210,16 @@ def analyze():
 
     except Exception as e:
         app.logger.error(f"Analysis error: {str(e)}", exc_info=True)
+        err_str = str(e)
+        user_msg = "Analysis failed"
+        if "429" in err_str or "Rate limit" in err_str:
+            user_msg = "API Rate Limit Exceeded (大模型 API 请求频率过高或Token额度已用尽)。请稍等几分钟后重试，或检查您的账户额度。"
+        elif "401" in err_str or "Authentication" in err_str:
+            user_msg = "API Key Invalid (API 密钥无效)。请检查配置。"
+        
         return jsonify({
-            "error": "Analysis failed",
-            "message": str(e),
+            "error": user_msg,
+            "message": err_str,
             "trace": traceback.format_exc() if app.debug else None
         }), 500
 

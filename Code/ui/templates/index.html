@@ -449,13 +449,10 @@
             background: rgba(255, 255, 255, 0.9);
         }
 
-        .clause-unenforceable {
-            border-left: 4px solid #FF3B30;
-        }
-
-        .clause-enforceable {
-            border-left: 4px solid #34C759;
-        }
+        .border-risk-high { border-left: 5px solid #FF3B30; }
+        .border-risk-medium { border-left: 5px solid #FF9500; }
+        .border-risk-low { border-left: 5px solid #34C759; }
+        .border-risk-none { border-left: 5px solid rgba(0,0,0,0.1); }
 
         .clause-header {
             display: flex;
@@ -619,10 +616,11 @@
                 <button type="submit">Analyze Contract (分析合同)</button>
             </form>
 
-            <div class="legend">
-                <b>Legend (图例):</b>
-                <span class="badge-legend badge-unenforceable">Unenforceable (不可执行)</span>
-                <span class="badge-legend badge-enforceable">Enforceable (可执行)</span>
+            <div class="legend" style="display: flex; gap: 4px; align-items: center; justify-content: space-between; flex-wrap: nowrap; margin-top: 20px; padding: 8px 10px; background: rgba(255,255,255,0.4); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.6); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                <b style="font-size: 0.75rem; color: var(--text-main); white-space: nowrap; margin-right: 2px;">Legend (图例):</b>
+                <span class="badge-legend risk-high" style="font-size: 0.7rem; padding: 3px 6px; white-space: nowrap;">High (高)</span>
+                <span class="badge-legend risk-medium" style="font-size: 0.7rem; padding: 3px 6px; white-space: nowrap;">Med (中)</span>
+                <span class="badge-legend risk-low" style="font-size: 0.7rem; padding: 3px 6px; white-space: nowrap;">Low (低)</span>
             </div>
         </div>
 
@@ -676,7 +674,16 @@
 
             try {
                 const response = await fetch("/analyze", { method: "POST", body: formData });
-                if (!response.ok) throw new Error(`Analysis failed: ${response.status}`);
+                if (!response.ok) {
+                    let errMsg = `Analysis failed: ${response.status}`;
+                    try {
+                        const errData = await response.json();
+                        if (errData.error) {
+                            errMsg = errData.error + (errData.message ? `<br><br><b>底层信息 (Raw Error):</b> ${errData.message}` : '');
+                        }
+                    } catch (e) {}
+                    throw new Error(errMsg);
+                }
                 const data = await response.json();
                 displayResults(data);
             } catch (error) {
@@ -731,16 +738,23 @@
 
             if (data.clauses && data.clauses.length > 0) {
                 data.clauses.forEach(clause => {
-                    const isUnenforceable = clause.classification && clause.classification.includes('Unenforceable');
-                    const cssClass = isUnenforceable ? 'clause-unenforceable' : 'clause-enforceable';
+                    let cssClass = 'border-risk-low';
 
-                    // Determine risk level badge
+                    // Determine risk level badge and border color
                     let riskBadge = '';
                     if (clause.risk_tier) {
                         const riskLower = clause.risk_tier.toLowerCase();
-                        const riskClass = riskLower.includes('high') || riskLower.includes('高风险') ? 'risk-high' :
-                            riskLower.includes('medium') || riskLower.includes('中风险') ? 'risk-medium' :
-                                'risk-low';
+                        let riskClass = 'risk-low';
+                        if (riskLower.includes('high') || riskLower.includes('高风险')) {
+                            riskClass = 'risk-high';
+                            cssClass = 'border-risk-high';
+                        } else if (riskLower.includes('medium') || riskLower.includes('中风险')) {
+                            riskClass = 'risk-medium';
+                            cssClass = 'border-risk-medium';
+                        } else {
+                            riskClass = 'risk-low';
+                            cssClass = 'border-risk-low';
+                        }
                         riskBadge = `<span class="risk-badge ${riskClass}">${clause.risk_tier}</span>`;
                     }
 
@@ -751,11 +765,10 @@
                                 <div class="clause-badges">${riskBadge}</div>
                             </div>
                             <div class="clause-details">
-                                <p><strong>Regulation(s) / 相关法规:</strong> ${clause.details?.regulations || 'None'}</p>
-                                <p><strong>Classification / 分类:</strong> ${clause.classification || 'Not specified'}</p>
-                                <p><strong>Explanation / 解释:</strong> ${clause.details?.explanation || 'No explanation provided'}</p>
-                                ${clause.details?.linguistic_traits && !clause.details.linguistic_traits.includes('Not applicable') ?
-                            `<p><strong>Linguistic Traits / 语言特征:</strong> ${clause.details.linguistic_traits}</p>` : ''}
+                                ${clause.details?.regulations ? `<p><strong>Regulation(s) / 相关法规:</strong><br>${clause.details.regulations}</p>` : ''}
+                                <p><strong>Comprehensive Explanation / 综合解释:</strong><br>${clause.details?.explanation || 'None'}</p>
+                                ${clause.details?.linguistic_traits && !clause.details.linguistic_traits.includes('Not applicable') && !clause.details.linguistic_traits.includes('None') ?
+                            `<p><strong>Linguistic Traits / 语言特征:</strong><br>${clause.details.linguistic_traits}</p>` : ''}
                             </div>
                             ${clause.details?.improvement_guidance && !clause.details.improvement_guidance.includes('No changes') && !clause.details.improvement_guidance.includes('无需修改') ?
                             `<div class="improvement-box">

@@ -200,7 +200,7 @@ if __name__ == "__main__":
         law_path      = "example_regulations.txt",
         risky_clauses = "example_risky_clauses.txt",
         model         = "deepseek-chat",
-        role          = "You are an experienced Chinese contract analyst.",
+        role          = "user",
         api_key       = os.environ.get("OPENAI_API_KEY", "YOUR_API_KEY_HERE"),
         api_base      = "https://api.deepseek.com",
         temperature   = 0.3,
