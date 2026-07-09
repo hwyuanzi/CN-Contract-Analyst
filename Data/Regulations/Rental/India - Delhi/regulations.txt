@@ -1,0 +1,36 @@
+INDIA - DELHI RESIDENTIAL RENTAL AGREEMENT LEGAL REFERENCE
+
+Use this file only as an initial academic baseline. Do not treat every listed rule as automatically applicable to every property or tenancy. If applicability depends on rent amount, premises type, lease duration, registration status, or facts not present in the lease, state that applicability is uncertain.
+
+1. Transfer of Property Act, 1882 - Section 107
+A lease of immovable property from year to year, for a term exceeding one year, or reserving yearly rent can be made only by a registered instrument. Other leases may be made either by a registered instrument or by oral agreement accompanied by delivery of possession.
+
+Use this source only when the clause or agreement term involves lease duration, yearly rent, or registration. Do not flag a clause as non-compliant if it says the agreement will be registered.
+
+2. Registration Act, 1908 - Section 17(1)(d)
+Leases of immovable property from year to year, for a term exceeding one year, or reserving yearly rent are documents for which registration is compulsory.
+
+Use this source when a lease exceeds one year, reserves yearly rent, or states that registration is unnecessary. If the lease duration is blank or unclear, classify the issue as missing information or applicability uncertain.
+
+3. Indian Contract Act, 1872 - Section 73
+A party who suffers from breach of contract is entitled to compensation for loss or damage that naturally arose in the usual course of things from the breach, or that the parties knew was likely to result from the breach.
+
+Use this source when a damages clause is being evaluated. Do not assume the amount is unlawful merely because it is high; explain proportionality concerns and uncertainty.
+
+4. Indian Contract Act, 1872 - Section 74
+When a contract names a sum to be paid in case of breach, or contains another stipulation by way of penalty, the party complaining of breach is entitled to reasonable compensation not exceeding the amount named or the penalty stipulated.
+
+Use this source for holdover rent, liquidated damages, penalty, and excessive damages clauses. Explain that a court may review whether the amount is reasonable.
+
+5. Delhi Rent Control Act, 1958 - Section 45
+This provision concerns cutting off or withholding an essential supply or service enjoyed by a tenant. Its applicability depends on whether the tenancy and premises fall within the Delhi Rent Control Act.
+
+Use this source only for clauses allowing disconnection of electricity, water, or other essential services. Always state applicability uncertainty unless the lease facts establish that the Act applies.
+
+6. Legal source requirement
+For every clause classified as potentially non-compliant, potentially unenforceable, or requiring legal review:
+- cite the exact Act and section from this reference;
+- explain what the law requires;
+- quote or identify the specific contract language that may conflict with the source;
+- state uncertainty when the lease does not provide enough facts;
+- do not invent additional statutes, sections, cases, or legal rules.

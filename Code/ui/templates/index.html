@@ -4,8 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chinese Contract Analyzer</title>
+    <title>ContractNerd International</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <style>
         :root {
             --glass-bg: rgba(255, 255, 255, 0.45);
@@ -25,7 +27,6 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -53,7 +54,6 @@
             }
         }
 
-        /* Ambient floating shapes */
         .bg-shape {
             position: absolute;
             filter: blur(80px);
@@ -68,7 +68,6 @@
             background: linear-gradient(135deg, rgba(0, 113, 227, 0.4), rgba(64, 156, 255, 0.2));
             top: -150px;
             left: -150px;
-            animation-delay: 0s;
         }
 
         .shape-2 {
@@ -104,7 +103,6 @@
             }
         }
 
-        /* Container framework */
         .container {
             width: 100%;
             max-width: 1500px;
@@ -127,7 +125,6 @@
             }
         }
 
-        /* Nav */
         nav {
             position: absolute;
             top: -4.5rem;
@@ -173,11 +170,11 @@
         .nav-logo {
             height: 42px;
             width: 42px;
-            border-radius: 20px;     /* matches the nav tab curve */
+            border-radius: 20px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             object-fit: cover;
             transition: all 0.3s ease;
-            background: #fff;        /* ensuring contrasting background if transparent */
+            background: #fff;
         }
 
         .nav-logo:hover {
@@ -185,7 +182,6 @@
             box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
         }
 
-        /* Glass Panels */
         .glass-panel {
             background: rgba(255, 255, 255, 0.45);
             backdrop-filter: blur(20px);
@@ -203,7 +199,6 @@
             background: rgba(255, 255, 255, 0.6);
         }
 
-        /* Form Container */
         .form-container {
             flex: 0 0 420px;
             max-width: 420px;
@@ -216,14 +211,6 @@
             align-items: center;
             gap: 15px;
             margin-bottom: 1.5rem;
-        }
-
-        .header img {
-            width: 50px;
-            height: 50px;
-            object-fit: contain;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .header h2 {
@@ -292,23 +279,32 @@
         }
 
         .legend {
-            margin-top: 2.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid rgba(0, 0, 0, 0.05);
             display: flex;
-            gap: 12px;
+            gap: 4px;
             align-items: center;
-            font-size: 0.9rem;
-            flex-wrap: wrap;
+            justify-content: space-between;
+            flex-wrap: nowrap;
+            margin-top: 20px;
+            padding: 8px 10px;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
         }
 
         .legend b {
-            font-weight: 600;
-            margin-right: 5px;
+            font-size: 0.75rem;
+            color: var(--text-main);
+            white-space: nowrap;
+            margin-right: 2px;
         }
 
         .badge-legend {
-            padding: 6px 12px;
+            font-size: 0.7rem;
+            padding: 3px 6px;
+            white-space: nowrap;
             border-radius: 20px;
             font-weight: 500;
             display: inline-flex;
@@ -316,19 +312,6 @@
             justify-content: center;
         }
 
-        .badge-unenforceable {
-            background: rgba(255, 59, 48, 0.1);
-            color: #FF3B30;
-            border: 1px solid rgba(255, 59, 48, 0.2);
-        }
-
-        .badge-enforceable {
-            background: rgba(52, 199, 89, 0.1);
-            color: #34C759;
-            border: 1px solid rgba(52, 199, 89, 0.2);
-        }
-
-        /* Results Container */
         .results-container {
             flex: 1;
             display: flex;
@@ -383,7 +366,16 @@
             padding-right: 10px;
         }
 
-        /* Custom Scrollbar */
+        .results-content.empty-mode {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .results-content.empty-mode .empty-state {
+            height: auto;
+        }
+
         .results-content::-webkit-scrollbar {
             width: 8px;
         }
@@ -449,10 +441,21 @@
             background: rgba(255, 255, 255, 0.9);
         }
 
-        .border-risk-high { border-left: 5px solid #FF3B30; }
-        .border-risk-medium { border-left: 5px solid #FF9500; }
-        .border-risk-low { border-left: 5px solid #34C759; }
-        .border-risk-none { border-left: 5px solid rgba(0,0,0,0.1); }
+        .border-risk-high {
+            border-left: 5px solid #FF3B30;
+        }
+
+        .border-risk-medium {
+            border-left: 5px solid #FF9500;
+        }
+
+        .border-risk-low {
+            border-left: 5px solid #34C759;
+        }
+
+        .border-risk-none {
+            border-left: 5px solid rgba(0, 0, 0, 0.1);
+        }
 
         .clause-header {
             display: flex;
@@ -566,6 +569,48 @@
             margin-bottom: 1rem;
             stroke-width: 1.5;
         }
+
+        @media print {
+            body {
+                background: #ffffff !important;
+            }
+
+            nav,
+            .form-container,
+            .bg-shape,
+            .copy-btn {
+                display: none !important;
+            }
+
+            .container {
+                display: block !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                max-width: none !important;
+            }
+
+            .results-container {
+                height: auto !important;
+                min-height: auto !important;
+                box-shadow: none !important;
+                border: none !important;
+                background: #ffffff !important;
+                padding: 0 !important;
+            }
+
+            .results-content {
+                overflow: visible !important;
+                padding: 0 !important;
+            }
+
+            .clause-card {
+                break-inside: avoid;
+                page-break-inside: avoid;
+                background: #ffffff !important;
+                border: 1px solid #ddd !important;
+                box-shadow: none !important;
+            }
+        }
     </style>
 </head>
 
@@ -576,24 +621,25 @@
 
     <div class="container">
         <nav style="display: flex; gap: 12px; align-items: center;">
-            <a href="/" class="logo-link"><img class="nav-logo" src="{{ url_for('static', filename='contractnerds_logo.png') }}" alt="Logo"></a>
-            <a href="/about">About Developer & Team (关于开发者与团队)</a>
+            <a href="/" class="logo-link">
+                <img class="nav-logo" src="{{ url_for('static', filename='contractnerds_logo.png') }}" alt="Logo">
+            </a>
+            <a href="/about">About Developers & Team</a>
         </nav>
 
-        <!-- Form Panel -->
         <div class="glass-panel form-container">
             <div class="header">
-                <h2>Chinese Contract Nerd</h2>
+                <h2>ContractNerd International</h2>
             </div>
 
             <p class="description">
-                AI-powered premium analysis of Chinese legal agreements. Effortlessly identify unreasonable contracts
-                and unconscionable clauses.<br><br>
-                基于人工智能的中文法律协议高级分析工具。轻松识别不合理合同与显失公平的霸王条款。
+                AI-powered analysis of contracts across multiple jurisdictions.
+                Identify ambiguous, potentially unenforceable, missing, and prejudicial clauses.<br><br>
+                Upload a contract, choose the relevant jurisdiction, and receive source-backed clause analysis.
             </p>
 
             <form id="analysis-form" enctype="multipart/form-data">
-                <label for="jurisdiction">Jurisdiction (司法管辖区):</label>
+                <label for="jurisdiction">Jurisdiction :</label>
                 <select id="jurisdiction" name="jurisdiction" required>
                     <option value="" disabled selected>-- Select --</option>
                     <option value="National (全国)">National (全国)</option>
@@ -601,43 +647,51 @@
                     <option value="Shanghai (上海)">Shanghai (上海)</option>
                     <option value="Guangdong (广东)">Guangdong (广东)</option>
                     <option value="Hefei (合肥)">Hefei (合肥)</option>
+                    <option value="India - Delhi">India - Delhi</option>
+                    <option value="England and Wales">England and Wales</option>
                 </select>
 
-                <label for="contractType">Contract Type (合同类型):</label>
+                <label for="contractType">Contract Type :</label>
                 <select id="contractType" name="contractType" required>
                     <option value="" disabled selected>-- Select --</option>
-                    <option value="Employment">Employment</option>
                     <option value="Rental">Rental</option>
+                    <option value="Employment">Employment</option>
                 </select>
 
-                <label for="contract">Document / PDF (合同文件):</label>
+                <label for="contract">Document / PDF :</label>
                 <input type="file" id="contract" name="contract" accept="application/pdf" required>
 
-                <button type="submit">Analyze Contract (分析合同)</button>
+                <button type="submit">Analyze Contract</button>
             </form>
 
-            <div class="legend" style="display: flex; gap: 4px; align-items: center; justify-content: space-between; flex-wrap: nowrap; margin-top: 20px; padding: 8px 10px; background: rgba(255,255,255,0.4); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.6); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
-                <b style="font-size: 0.75rem; color: var(--text-main); white-space: nowrap; margin-right: 2px;">Legend (图例):</b>
-                <span class="badge-legend risk-high" style="font-size: 0.7rem; padding: 3px 6px; white-space: nowrap;">High (高)</span>
-                <span class="badge-legend risk-medium" style="font-size: 0.7rem; padding: 3px 6px; white-space: nowrap;">Med (中)</span>
-                <span class="badge-legend risk-low" style="font-size: 0.7rem; padding: 3px 6px; white-space: nowrap;">Low (低)</span>
+            <div class="legend">
+                <b>Legend :</b>
+                <span class="badge-legend risk-high">High</span>
+                <span class="badge-legend risk-medium">Med</span>
+                <span class="badge-legend risk-low">Low</span>
             </div>
         </div>
 
-        <!-- Results Panel -->
         <div class="glass-panel results-container">
             <div class="results-header">
-                <h2>Analysis Results (分析结果)</h2>
-                <button class="copy-btn" id="copy-results" title="Copy all results">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <rect x="8" y="8" width="12" height="12" rx="2" />
-                        <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
-                    </svg>
-                    Copy
-                </button>
+                <h2>Analysis Results</h2>
+
+                <div style="display: flex; gap: 10px;">
+                    <button class="copy-btn" id="download-pdf" type="button" title="Download results as PDF" style="display: none;">
+                        Download PDF
+                    </button>
+
+                    <button class="copy-btn" id="copy-results" type="button" title="Copy all results" style="display: none;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <rect x="8" y="8" width="12" height="12" rx="2" />
+                            <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
+                        </svg>
+                        Copy
+                    </button>
+                </div>
             </div>
 
-            <div class="results-content" id="result">
+            <div class="results-content empty-mode" id="result">
                 <div class="empty-state">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -646,8 +700,8 @@
                         <line x1="16" y1="17" x2="8" y2="17"></line>
                         <polyline points="10 9 9 9 8 9"></polyline>
                     </svg>
-                    <h3>Ready for Analysis (准备分析)</h3>
-                    <p>Upload a contract to view AI-generated bilingual insights. (上传合同以查看AI生成的双语分析结论。)</p>
+                    <h3>Ready for Analysis</h3>
+                    <p>Upload a contract to view AI-generated, source-backed insights.</p>
                 </div>
             </div>
         </div>
@@ -656,6 +710,7 @@
     <script>
         document.getElementById("analysis-form").onsubmit = async function (event) {
             event.preventDefault();
+
             const jurisdiction = document.getElementById("jurisdiction").value;
             const contractType = document.getElementById("contractType").value;
             const contractFile = document.getElementById("contract").files[0];
@@ -673,17 +728,28 @@
             showLoading();
 
             try {
-                const response = await fetch("/analyze", { method: "POST", body: formData });
+                const response = await fetch("/analyze", {
+                    method: "POST",
+                    body: formData,
+                });
+
                 if (!response.ok) {
                     let errMsg = `Analysis failed: ${response.status}`;
+
                     try {
                         const errData = await response.json();
                         if (errData.error) {
-                            errMsg = errData.error + (errData.message ? `<br><br><b>底层信息 (Raw Error):</b> ${errData.message}` : '');
+                            errMsg = errData.error + (
+                                errData.message
+                                    ? `<br><br><b>Raw Error:</b> ${errData.message}`
+                                    : ''
+                            );
                         }
                     } catch (e) {}
+
                     throw new Error(errMsg);
                 }
+
                 const data = await response.json();
                 displayResults(data);
             } catch (error) {
@@ -692,20 +758,32 @@
         };
 
         function showLoading() {
-            document.getElementById("result").innerHTML = `
+            const resultBox = document.getElementById("result");
+            resultBox.classList.remove("empty-mode");
+
+            document.getElementById("download-pdf").style.display = "none";
+            document.getElementById("copy-results").style.display = "none";
+
+            resultBox.innerHTML = `
                 <div class="analyzing-status">
                     <div class="spinner"></div>
-                    <h3>AI is analyzing your contract... (AI正在分析您的合同...)</h3>
-                    <p>Extracting clauses and assessing risk bilingual context. (正在提取条款并在双语背景下评估风险。)</p>
+                    <h3>AI is analyzing your contract...</h3>
+                    <p>Extracting clauses and assessing jurisdiction-specific legal risk.</p>
                 </div>
             `;
         }
 
         function showError(message) {
-            document.getElementById("result").innerHTML = `
-                <div class="clause-card clause-unenforceable">
+            const resultBox = document.getElementById("result");
+            resultBox.classList.remove("empty-mode");
+
+            document.getElementById("download-pdf").style.display = "none";
+            document.getElementById("copy-results").style.display = "none";
+
+            resultBox.innerHTML = `
+                <div class="clause-card border-risk-high">
                     <div class="clause-header">
-                        <div class="clause-text">Analysis Error (分析错误)</div>
+                        <div class="clause-text">Analysis Error</div>
                     </div>
                     <div class="clause-details">
                         <p>${message}</p>
@@ -715,22 +793,50 @@
         }
 
         function displayResults(data) {
+            const resultBox = document.getElementById("result");
+            resultBox.classList.remove("empty-mode");
+
+            document.getElementById("download-pdf").style.display = "flex";
+            document.getElementById("copy-results").style.display = "flex";
+
             let resultHTML = '';
+
+            const isChineseJurisdiction = data.metadata && data.metadata.jurisdiction !== "India - Delhi" && data.metadata.jurisdiction !== "England and Wales";
+
+            const labels = isChineseJurisdiction ? {
+                totalClauses: "条款总数",
+                flagged: "需审查条款",
+                jurisdiction: "司法管辖区",
+                legalAuthority: "相关法规",
+                explanation: "综合解释",
+                linguisticTraits: "语言特征",
+                improvementGuidance: "改进建议",
+                noClauses: "未找到条款"
+            } : {
+                totalClauses: "Total Clauses",
+                flagged: "Flagged for Review",
+                jurisdiction: "Jurisdiction",
+                legalAuthority: "Legal Authority",
+                explanation: "Explanation",
+                linguisticTraits: "Linguistic Traits",
+                improvementGuidance: "Improvement Guidance",
+                noClauses: "No Clauses Found"
+            };
 
             if (data.metadata) {
                 resultHTML += `
                     <div class="analysis-summary">
                         <div class="summary-card">
                             <div class="summary-value">${data.metadata.clause_count}</div>
-                            <div class="summary-label">Total Clauses (条款总数)</div>
+                            <div class="summary-label">${labels.totalClauses}</div>
                         </div>
                         <div class="summary-card">
                             <div class="summary-value" style="color:#FF3B30">${data.metadata.unenforceable_count}</div>
-                            <div class="summary-label">Risky/Unenforceable (风险/不可执行)</div>
+                            <div class="summary-label">${labels.flagged}</div>
                         </div>
                         <div class="summary-card">
                             <div class="summary-value" style="font-size:1.1rem; line-height:1.5">${data.metadata.jurisdiction}</div>
-                            <div class="summary-label">Jurisdiction (司法管辖区)</div>
+                            <div class="summary-label">${labels.jurisdiction}</div>
                         </div>
                     </div>
                 `;
@@ -739,22 +845,23 @@
             if (data.clauses && data.clauses.length > 0) {
                 data.clauses.forEach(clause => {
                     let cssClass = 'border-risk-low';
-
-                    // Determine risk level badge and border color
                     let riskBadge = '';
+
                     if (clause.risk_tier) {
                         const riskLower = clause.risk_tier.toLowerCase();
                         let riskClass = 'risk-low';
-                        if (riskLower.includes('high') || riskLower.includes('高风险')) {
+
+                        if (riskLower.includes('high')) {
                             riskClass = 'risk-high';
                             cssClass = 'border-risk-high';
-                        } else if (riskLower.includes('medium') || riskLower.includes('中风险')) {
+                        } else if (riskLower.includes('medium')) {
                             riskClass = 'risk-medium';
                             cssClass = 'border-risk-medium';
                         } else {
                             riskClass = 'risk-low';
                             cssClass = 'border-risk-low';
                         }
+
                         riskBadge = `<span class="risk-badge ${riskClass}">${clause.risk_tier}</span>`;
                     }
 
@@ -764,17 +871,28 @@
                                 <div class="clause-text">"${clause.text}"</div>
                                 <div class="clause-badges">${riskBadge}</div>
                             </div>
+
                             <div class="clause-details">
-                                ${clause.details?.regulations ? `<p><strong>Regulation(s) / 相关法规:</strong><br>${clause.details.regulations}</p>` : ''}
-                                <p><strong>Comprehensive Explanation / 综合解释:</strong><br>${clause.details?.explanation || 'None'}</p>
-                                ${clause.details?.linguistic_traits && !clause.details.linguistic_traits.includes('Not applicable') && !clause.details.linguistic_traits.includes('None') ?
-                            `<p><strong>Linguistic Traits / 语言特征:</strong><br>${clause.details.linguistic_traits}</p>` : ''}
+                                ${clause.details?.regulations ? `<p><strong>${labels.legalAuthority}:</strong><br>${clause.details.regulations}</p>` : ''}
+                                <p><strong>${labels.explanation}:</strong><br>${clause.details?.explanation || 'None'}</p>
+                                ${
+                                    clause.details?.linguistic_traits
+                                    && !clause.details.linguistic_traits.includes('Not applicable')
+                                    && !clause.details.linguistic_traits.includes('None')
+                                        ? `<p><strong>${labels.linguisticTraits}:</strong><br>${clause.details.linguistic_traits}</p>`
+                                        : ''
+                                }
                             </div>
-                            ${clause.details?.improvement_guidance && !clause.details.improvement_guidance.includes('No changes') && !clause.details.improvement_guidance.includes('无需修改') ?
-                            `<div class="improvement-box">
-                                    <strong>Improvement Guidance / 改进建议:</strong><br>
-                                    ${clause.details.improvement_guidance}
-                                </div>` : ''}
+
+                            ${
+                                clause.details?.improvement_guidance
+                                && !clause.details.improvement_guidance.includes('No changes')
+                                    ? `<div class="improvement-box">
+                                            <strong>${labels.improvementGuidance}:</strong><br>
+                                            ${clause.details.improvement_guidance}
+                                       </div>`
+                                    : ''
+                            }
                         </div>
                     `;
                 });
@@ -782,26 +900,127 @@
                 resultHTML += `
                     <div class="empty-state">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                             <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                             <line x1="12" y1="9" x2="12" y2="13"></line>
-                             <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
                         </svg>
-                        <h3>No Clauses Found (未找到条款)</h3>
-                        <p>The AI didn't return extracted clauses for this document. (AI未返回该文档的提取条款。)</p>
+                        <h3>${labels.noClauses}</h3>
+                        <p>The AI did not return extracted clauses for this document.</p>
                     </div>
                 `;
             }
-            document.getElementById("result").innerHTML = resultHTML;
+
+            resultBox.innerHTML = resultHTML;
         }
 
         document.getElementById("copy-results").addEventListener("click", function () {
             const results = document.getElementById("result").innerText;
+
             navigator.clipboard.writeText(results).then(() => {
                 const btn = this;
                 const originalHTML = btn.innerHTML;
                 btn.innerHTML = 'Copied!';
-                setTimeout(() => { btn.innerHTML = originalHTML; }, 2000);
+
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                }, 2000);
             });
+        });
+
+        document.getElementById("download-pdf").addEventListener("click", function () {
+            const resultElement = document.getElementById("result");
+
+            if (!resultElement || resultElement.innerText.includes("Ready for Analysis")) {
+                alert("Please analyze a contract before downloading the PDF.");
+                return;
+            }
+
+            const clonedResult = resultElement.cloneNode(true);
+
+            clonedResult.style.width = "100%";
+            clonedResult.style.maxWidth = "100%";
+            clonedResult.style.overflow = "visible";
+            clonedResult.style.paddingRight = "0";
+
+            clonedResult.querySelectorAll("*").forEach(el => {
+                el.style.maxWidth = "100%";
+                el.style.overflow = "visible";
+                el.style.boxSizing = "border-box";
+            });
+
+            clonedResult.querySelectorAll(".clause-card").forEach(card => {
+                card.style.pageBreakInside = "avoid";
+                card.style.breakInside = "avoid";
+                card.style.marginBottom = "18px";
+            });
+
+            clonedResult.querySelectorAll(".clause-header").forEach(header => {
+                header.style.display = "block";
+            });
+
+            clonedResult.querySelectorAll(".clause-badges").forEach(badge => {
+                badge.style.marginTop = "8px";
+            });
+
+            clonedResult.querySelectorAll(".analysis-summary").forEach(summary => {
+                summary.style.display = "grid";
+                summary.style.gridTemplateColumns = "1fr 1fr 1fr";
+                summary.style.gap = "10px";
+            });
+
+            clonedResult.querySelectorAll(".summary-value").forEach(value => {
+                value.style.fontSize = "16px";
+                value.style.wordBreak = "break-word";
+            });
+
+            clonedResult.querySelectorAll(".clause-text").forEach(text => {
+                text.style.wordBreak = "break-word";
+                text.style.overflowWrap = "break-word";
+            });
+
+            const wrapper = document.createElement("div");
+            wrapper.style.width = "7.2in";
+            wrapper.style.padding = "20px";
+            wrapper.style.boxSizing = "border-box";
+            wrapper.style.fontFamily = "Inter, Arial, sans-serif";
+            wrapper.style.color = "#1d1d1f";
+            wrapper.style.background = "#ffffff";
+
+            const title = document.createElement("h1");
+            title.innerText = "ContractNerd International - Analysis Report";
+            title.style.fontSize = "22px";
+            title.style.marginBottom = "8px";
+
+            const subtitle = document.createElement("p");
+            subtitle.innerText = "Generated clause-level contract analysis report.";
+            subtitle.style.fontSize = "12px";
+            subtitle.style.color = "#555";
+            subtitle.style.marginBottom = "20px";
+
+            wrapper.appendChild(title);
+            wrapper.appendChild(subtitle);
+            wrapper.appendChild(clonedResult);
+
+            const opt = {
+                margin: 0.4,
+                filename: "contractnerd-analysis-report.pdf",
+                image: { type: "jpeg", quality: 0.98 },
+                html2canvas: {
+                    scale: 1.5,
+                    useCORS: true,
+                    scrollY: 0
+                },
+                jsPDF: {
+                    unit: "in",
+                    format: "letter",
+                    orientation: "portrait"
+                },
+                pagebreak: {
+                    mode: ["avoid-all", "css", "legacy"]
+                }
+            };
+
+            html2pdf().set(opt).from(wrapper).save();
         });
     </script>
 </body>

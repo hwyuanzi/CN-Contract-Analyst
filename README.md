@@ -1,113 +1,272 @@
-# Chinese Contract Nerd (CN-Contract-Analyst)
+# ContractNerd International
 
-An LLM-powered application for analyzing Chinese contracts and identifying risky, unenforceable, or ambiguous clauses with a premium Liquid Glass aesthetic.
+ContractNerd International is an academic contract-analysis prototype that uses large language models to review contracts across jurisdictions. The system helps identify clauses that may be incomplete, ambiguous, prejudicial, potentially unenforceable, or in need of further legal review.
 
-## Project Overview
+The application currently supports contract analysis across multiple jurisdictions, including China-based jurisdictions and India - Delhi.
 
-Chinese Contract Nerd is a state-of-the-art contract analysis tool designed to detect and highlight potential risks in Chinese legal agreements. The tool empowers second parties (such as renters and employees) by identifying missing elements, illegal terms, and unfair clauses.
+## Overview
 
-This application is an extended development based on the academic foundation and original web app launched alongside our research article:  
-**[ContractNerd: An AI Tool to Find Unenforceable, Ambiguous, and Prejudicial Clauses in Contracts](https://doi.org/10.3390/electronics14214212)** (Electronics 2025).
+ContractNerd International allows a user to upload a PDF contract, select a jurisdiction and contract type, and receive clause-level analysis. The system extracts clauses from the uploaded document, compares them against jurisdiction-specific reference material, and returns structured results with risk levels, explanations, legal authority where available, and improvement guidance.
 
-- **App Developer:** Haowen (Hollan) Yuan ([https://www.hyuan.io/](https://www.hyuan.io/))
-- **Research Advisor:** Dennis Shasha ([https://cs.nyu.edu/~shasha/](https://cs.nyu.edu/~shasha/))
-- **Paper Co-authors:** Musonda Sinkala, Yuge Duan
+The goal is not only to label a clause as risky, but to explain why it may be risky, what information may be missing, and what legal or drafting issue should be reviewed.
+
+## Supported Jurisdictions
+
+The current interface includes the following jurisdiction options:
+
+- National (全国)
+- Beijing (北京)
+- Shanghai (上海)
+- Guangdong (广东)
+- Hefei (合肥)
+- India - Delhi
+
+## Supported Contract Types
+
+The current interface includes the following contract types:
+
+- Rental
+- Employment
+
+Rental agreement analysis is currently implemented for India - Delhi. Employment analysis depends on whether jurisdiction-specific data files are available for the selected jurisdiction.
 
 ## Features
 
-- **Bilingual Analysis:** Provides risk assessments, legal explanations, and improvement guidance in both English and Chinese.
-- **Clause Risk Profiling:** Detects lexical ambiguity, syntactic ambiguity, undue generality, and redundant clauses specific to Chinese legal contexts.
-- **Premium User Interface:** A modern, frosted glassmorphism UI styled after Apple's liquid glass design.
-- **API Integration:** Backend processing via LLM pipeline (Meta-Llama 3.3).
+- PDF contract upload
+- Jurisdiction selection
+- Contract type selection
+- Clause extraction from uploaded agreements
+- Clause-level legal and drafting risk analysis
+- Risk classification as High Risk, Medium Risk, or Low Risk
+- Legal authority display where applicable
+- Explanation of the clause issue
+- Improvement guidance for flagged clauses
+- Copyable analysis results
+- Developer and team information page
 
-## Folder Structure
+## Analysis Philosophy
+
+ContractNerd International is designed for source-backed issue spotting.
+
+For each clause, the system should try to explain:
+
+1. What the clause says.
+2. Whether the clause is complete or missing important information.
+3. Whether the clause is ambiguous or practically risky.
+4. Whether a jurisdiction-specific legal reference applies.
+5. What the relevant legal source says, when available.
+6. How the clause may conflict with or fail to satisfy that source.
+7. What revision or review step may improve the clause.
+
+The system should avoid treating ordinary template blanks as legal violations. For example, placeholders such as `(Date)`, `(Amount)`, `(Address)`, `(Starting Date of Agreement)`, `(Expiry Date of Agreement)`, `(Amount of rent in Numbers)`, or `(city)` should generally be treated as missing required information unless a specific legal source supports a stronger conclusion.
+
+## Output Format
+
+The intended output for each clause is:
 
 ```text
-Chinese-Contract-Nerd
-│── Code/                        # Source code for the project
-│   ├── base/                    # Core contract analysis logic
-│   │   ├── utils/               # Utility scripts
-│   │   ├── clause_comparison.py # Compares clauses against regulations 
-│   │   ├── clause_generation.py # Generates risky clauses
-│   │   ├── regulation_synthesizing.py 
-│   ├── ui/                      # Front-end interface
-│   │   ├── templates/           # HTML templates (index.html, about.html)
-│   ├── static/                  # Static web assets (logos, images)
-│   ├── app.py                   # Flask server application
-│── Data/                        # Legal databases and repositories
-│   ├── Gold Standards/          # Ground truth regulations & rules for the LLM pipeline
-│   ├── Regulations/             # Chinese regional and national legal documents
-│   ├── Risky Clauses/           # Example clauses for few-shot learning
-│── .env.example                 # Template for API credentials
-│── Pipfile / Pipfile.lock       # Python dependencies (managed by Pipenv)
-│── README.md                    # Project documentation
+Clause: "[Exact clause text]"
+Legal Authority: [Exact Act and section, or None]
+Classification: [Enforceable / Missing Required Information / Ambiguous / Potentially Prejudicial / Potentially Unenforceable / Requires Further Legal Review]
+Risk Tier: [High Risk / Medium Risk / Low Risk]
+Explanation: [Source-backed explanation of the legal, drafting, or practical issue]
+Improvement Guidance: [Specific revision or review step]
 ```
 
-## Running the Web App Locally (Deployment Guide)
+The web interface displays:
 
-Follow these detailed steps to host and launch the application on your local machine:
+- Total clauses
+- Clauses flagged for review
+- Selected jurisdiction
+- Clause text
+- Risk tier
+- Legal authority, where available
+- Explanation
+- Improvement guidance
 
-### 1. Clone the Repository
-Open your terminal and clone the project source code:
-```bash
-git clone https://github.com/hwyuanzi/CN-Contract-Analyst.git
-cd CN-Contract-Analyst
+## Project Structure
+
+```text
+.
+├── Code/
+│   ├── app.py
+│   ├── base/
+│   │   ├── clause_comparison.py
+│   │   ├── clause_generation.py
+│   │   ├── main.py
+│   │   ├── regulation_synthesizing.py
+│   │   └── utils/
+│   │       └── functions.py
+│   ├── static/
+│   └── ui/
+│       └── templates/
+│           ├── about.html
+│           └── index.html
+├── Data/
+│   ├── Gold Standards/
+│   ├── Regulations/
+│   └── Risky Clauses/
+├── uploads/
+├── .env.example
+├── .gitignore
+├── LICENSE
+├── Pipfile
+└── README.md
 ```
 
-### 2. Set Up the Environment
-This project uses **Pipenv** for clean dependency management. Ensure you have Python 3.10+ installed on your system.
-```bash
-# Install pipenv globally if you don't have it yet
-pip install pipenv
+## Data Organization
 
-# Install all required project dependencies
+Jurisdiction-specific files are stored under the `Data/` directory.
+
+For each contract type and jurisdiction, the expected structure is:
+
+```text
+Data/
+├── Gold Standards/
+│   └── [Contract Type]/
+│       └── [Jurisdiction]/
+│           └── gold_standard.txt
+├── Regulations/
+│   └── [Contract Type]/
+│       └── [Jurisdiction]/
+│           └── regulations.txt
+└── Risky Clauses/
+    └── [Contract Type]/
+        └── [Jurisdiction]/
+            └── risky_clauses.txt
+```
+
+For example, the India - Delhi rental workflow uses:
+
+```text
+Data/Gold Standards/Rental/India - Delhi/gold_standard.txt
+Data/Regulations/Rental/India - Delhi/regulations.txt
+Data/Risky Clauses/Rental/India - Delhi/risky_clauses.txt
+```
+
+For employment analysis, the same structure should be used under `Employment` when jurisdiction-specific employment data is available:
+
+```text
+Data/Gold Standards/Employment/[Jurisdiction]/gold_standard.txt
+Data/Regulations/Employment/[Jurisdiction]/regulations.txt
+Data/Risky Clauses/Employment/[Jurisdiction]/risky_clauses.txt
+```
+
+## Reference Files
+
+### `gold_standard.txt`
+
+The gold standard file describes what a strong contract should contain for a given jurisdiction and contract type. It can include completeness expectations, recommended drafting standards, and important clause categories.
+
+### `regulations.txt`
+
+The regulations file contains jurisdiction-specific legal references used for source-backed analysis. The model should cite only authorities included in this file and should not invent statutes, cases, sections, or legal rules.
+
+### `risky_clauses.txt`
+
+The risky clauses file gives guidance for classifying contract language by risk level. It helps distinguish high-risk legal issues from medium-risk drafting problems and low-risk standard clauses.
+
+## Setup
+
+Create a `.env` file using `.env.example` as a template.
+
+```env
+OPENAI_API_KEY="YOUR_API_KEY_HERE"
+OPENAI_API_BASE="https://api.openai.com/v1"
+LLM_MODEL="gpt-4o-mini"
+```
+
+Do not commit your real `.env` file.
+
+Install dependencies:
+
+```bash
 pipenv install
 ```
 
-### 3. Configure the LLM API (.env file)
-The application relies on large language models (such as Meta-Llama 3.3 or DeepSeek) to analyze contracts. You must provide your API credentials before launching the app.
+Run the Flask app:
 
-Create a file named `.env` in the root directory (you can copy the provided `.env.example` file):
-```bash
-cp .env.example .env
-```
-Open the `.env` file and configure your API details. 
-*Note: If you use the default DeepSeek model, you only need to provide the `OPENAI_API_KEY`.*
-
-**Example for using DeepSeek (Default):**
-```env
-OPENAI_API_KEY="sk-your-deepseek-api-key"
-```
-
-**Example for using Meta-Llama 3.3 (via SambaNova or other OpenAI-compatible proxies):**
-*(This allows handling UUID format keys and custom endpoints)*
-```env
-OPENAI_API_KEY="your-uuid-or-proxy-api-key"
-OPENAI_API_BASE="https://api.sambanova.ai/v1"
-LLM_MODEL="Meta-Llama-3.3-70B-Instruct"
-```
-
-### 4. Start the Flask Server
-Once your environment variables are configured, launch the backend server:
 ```bash
 pipenv run python Code/app.py
 ```
-You should see terminal output confirming the server has started (e.g., `* Running on http://127.0.0.1:5000`).
 
-### 5. Access the Web Interface
-Open your favorite web browser and navigate to the local host address:
-**[http://127.0.0.1:5000](http://127.0.0.1:5000)**
+Or, if you are using an activated virtual environment:
 
-You can now use the elegant UI to upload PDF contract files and run bilingual risk analyses!
+```bash
+python Code/app.py
+```
 
----
+Then open:
 
-## 摘要 (Chinese Summary)
+```text
+http://127.0.0.1:5000
+```
 
-**Chinese Contract Nerd (中国合同分析助手)** 是一款基于大语言模型 (LLM) 的工具，专为分析中文合同中的风险条款而设计。
+## Usage
 
-本项目是基于我们团队2025年发表的基础研究论文及初期Web应用的进一步延伸与开发落地：[《ContractNerd: An AI Tool to Find Unenforceable, Ambiguous, and Prejudicial Clauses in Contracts》](https://doi.org/10.3390/electronics14214212)。该Web应用通过强大的自然语言处理技术，可有效识别中文合同中存在歧义、过度泛化、冗余以及违反相关法律法规（如《民法典》）的霸王条款。全站采用极具高级感的“苹果玻璃态 (Liquid Glass)” UI设计，提供严谨的双语鉴定报告。
+1. Start the Flask app.
+2. Open the local web interface.
+3. Upload a PDF contract.
+4. Select the relevant jurisdiction.
+5. Select the contract type.
+6. Click **Analyze Contract**.
+7. Review the clause-level output.
 
-- **应用开发者:** 袁浩文 (Haowen Yuan) - [https://www.hyuan.io/](https://www.hyuan.io/)
-- **研究指导教授:** Dennis Shasha - [https://cs.nyu.edu/~shasha/](https://cs.nyu.edu/~shasha/)
-- **论文合作作者:** Musonda Sinkala, Yuge Duan
+For the India - Delhi demo, use:
+
+```text
+Jurisdiction: India - Delhi
+Contract Type: Rental
+```
+
+## Development Notes
+
+The main Flask backend is located at:
+
+```text
+Code/app.py
+```
+
+The clause analysis pipeline is located at:
+
+```text
+Code/base/clause_comparison.py
+```
+
+The frontend templates are located at:
+
+```text
+Code/ui/templates/index.html
+Code/ui/templates/about.html
+```
+
+Uploaded files are temporarily stored in:
+
+```text
+uploads/
+```
+
+## Legal Analysis Rules
+
+The system should follow these principles:
+
+- Use the exact clause text from the uploaded contract.
+- Cite legal authority only when it appears in the jurisdiction-specific reference file.
+- Do not invent legal sources.
+- Do not treat placeholders or missing fields as legal violations by default.
+- State uncertainty when the applicable law depends on facts not present in the contract.
+- Explain the connection between the cited authority and the actual clause language.
+- Provide practical improvement guidance.
+
+For liquidated damages, penalty, holdover rent, or double-rent clauses, the analysis should explain the reasonable-compensation issue and should not automatically state that the amount must be limited to ordinary rent unless the legal reference specifically says so.
+
+## Disclaimer
+
+ContractNerd International is an academic research prototype. It is not legal advice and should not be used as a substitute for professional legal review. Users should consult qualified legal counsel before signing, enforcing, or relying on any legally binding agreement.
+
+## Credits
+
+- India/Delhi Developer: Dhruv Pandoh
+- Original App Developer: Haowen (Hollan) Yuan
+- Research Advisor: Professor Dennis Shasha
+- Paper Co-authors: Musonda Sinkala and Yuge Duan

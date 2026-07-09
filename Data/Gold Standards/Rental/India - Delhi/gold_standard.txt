@@ -1,0 +1,101 @@
+INDIA – DELHI RESIDENTIAL LEASE REVIEW BASELINE
+
+Important scope:
+This file is an initial research baseline for reviewing residential leases in Delhi. The system must not assume that every statute applies to every property or tenancy. Every legal conclusion must identify the relevant source and clearly state uncertainty when applicability depends on facts not contained in the lease.
+
+1. PARTIES AND PROPERTY
+
+The lease should clearly identify:
+- the landlord
+- the tenant
+- the complete address and description of the premises
+- the permitted residential use of the premises
+
+Flag missing or ambiguous identification of the parties or property.
+
+2. RENT AND PAYMENT TERMS
+
+The lease should clearly state:
+- monthly rent
+- payment due date
+- payment method
+- consequences of delayed payment
+- whether maintenance or utility charges are included
+
+Flag clauses that allow unspecified or unilateral charges.
+
+3. SECURITY DEPOSIT
+
+The lease should clearly state:
+- deposit amount
+- permitted deductions
+- refund timing
+- conditions for withholding the deposit
+
+Flag clauses allowing the landlord to retain the entire deposit without an itemized reason.
+
+4. TERM AND REGISTRATION
+
+Under Section 107 of the Transfer of Property Act, 1882, a lease from year to year, for a term exceeding one year, or reserving yearly rent can be made only by a registered instrument.
+
+Under Section 17(1)(d) of the Registration Act, 1908, leases of immovable property from year to year, for a term exceeding one year, or reserving yearly rent are compulsorily registrable.
+
+Flag a lease exceeding one year if it states that registration is unnecessary.
+
+5. NOTICE AND TERMINATION
+
+The lease should clearly state:
+- notice period
+- permitted grounds for termination
+- procedure for giving notice
+- consequences of early termination
+
+Flag clauses permitting immediate eviction, lockout, seizure of belongings, or termination without notice unless a verified legal source supports that remedy.
+
+6. REPAIRS AND MAINTENANCE
+
+The lease should distinguish:
+- routine tenant maintenance
+- structural repairs
+- damage caused by the tenant
+- ordinary wear and tear
+
+Flag clauses that make the tenant responsible for every repair, including structural defects or ordinary wear and tear, without qualification.
+
+7. LANDLORD ACCESS
+
+The lease should explain when and how the landlord may enter the premises.
+
+Flag unrestricted entry without notice, except for genuine emergencies.
+
+8. UTILITIES AND ESSENTIAL SERVICES
+
+The lease should identify responsibility for electricity, water, gas, internet, and other utilities.
+
+Flag clauses allowing essential services to be disconnected solely as a private enforcement mechanism without documented legal authority.
+
+9. SUBLETTING AND ASSIGNMENT
+
+The lease should state whether subletting or assignment is allowed and whether written consent is required.
+
+Flag vague or contradictory provisions.
+
+10. DISPUTE RESOLUTION
+
+The lease should state:
+- governing law
+- court or forum
+- arbitration procedure, if any
+
+Flag clauses allowing only one party to appoint the arbitrator or control the dispute process.
+
+11. LEGAL-SOURCE REQUIREMENT
+
+For every clause classified as potentially unlawful or unenforceable:
+- quote the exact lease clause
+- cite the exact Act and section
+- explain how the source applies
+- state when applicability is uncertain
+- do not invent statutes, sections, cases, or legal requirements
+
+The output is issue spotting and not legal advice.

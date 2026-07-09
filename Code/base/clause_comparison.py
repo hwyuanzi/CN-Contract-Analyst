@@ -1,29 +1,26 @@
 import os
-import pickle
 import openai
-import json
-from Code.base.utils.functions import read_pdf_pymupdf, extract_info  # If publishing the code using flask
-# from utils.functions import read_pdf_pymupdf, extract_info  # If testing locally
 
-def clause_comparison(contract_path, law_path, risky_clauses, model, role, api_base, api_key, temperature, top_p, max_tokens, retries = 5):
-    # Define Llama client
-    client = openai.OpenAI(
-        api_key  = api_key,
-        base_url = api_base,
-    )
+from Code.base.utils.functions import read_document, extract_info
 
-    def completeness_assesment(contract, laws):
-        prompt = f"""
-                     You are a contract language specialist tasked with reviewing the
-                     following Chinese contract relative to the gold standard contract provided.
-                     Highlight each clause in the gold standard contract that is not present
-                     in the provided contract and detail the possible implications of this
-                     clause not being present. ALL OUTPUT MUST BE IN CHINESE.
-                     The output should be of the following format:
-                     Clause:
-                     Implication if missing:   
-                  """
 
+def clause_comparison(
+    contract_path,
+    law_path,
+    risky_clauses,
+    model,
+    role,
+    api_base,
+    api_key,
+    temperature,
+    top_p,
+    max_tokens,
+    retries=5,
+):
+    """Run source-grounded clause analysis."""
+    client = openai.OpenAI(api_key=api_key, base_url=api_base)
+
+    def call_llm(prompt: str) -> str:
         response = client.chat.completions.create(
             model=model,
             messages=[{"role": role, "content": prompt}],
@@ -33,178 +30,114 @@ def clause_comparison(contract_path, law_path, risky_clauses, model, role, api_b
         )
         return response.choices[0].message.content
 
-    # Function to compare contract against relevant laws
-    def law_comparison(contract, laws):
-
+    def law_comparison(contract: str, laws: str) -> str:
         prompt = f"""
-                  You are a contract language specialist reviewing Chinese contract clauses against regulations. 
-                  ALL YOUR RESPONSES AND REASONING MUST BE BILINGUAL (BOTH ENGLISH AND CHINESE).
-                  Output Requirements:
-                  - Analyze each clause individually
-                  - Use EXACTLY this format for every clause without deviation:
-                      
-                  Clause: "[EXACT FULL CLAUSE TEXT FROM CONTRACT IN CHINESE]"
-                  Regulation(s) Implicated: [REGULATION CITATION IN ENGLISH / REGULATION CITATION IN CHINESE OR "None/无" IF COMPLIANT]
-                  Reasoning: [CONCISE EXPLANATION OF COMPLIANCE/NON-COMPLIANCE IN ENGLISH]
-                  [CONCISE EXPLANATION OF COMPLIANCE/NON-COMPLIANCE IN CHINESE]
-                    
-                  Rules:
-                  1. Always include the exact clause text in quotes after "Clause:"
-                  2. Never create titles or summarize clauses - use them exactly as written
-                  3. If uncertain about compliance, state this in both languages in the reasoning
-                  4. Never combine clauses - analyze each separately
-                  5. Include all clauses, even compliant ones
-                  6. Preserve all numbers and names exactly as written
-                    
-                  Contract Clauses:
-                  {contract}
-                   
-                  Regulations:
-                  {laws}
-                  """
+You are a source-grounded contract reviewer.
 
-        response = client.chat.completions.create(
-            model       = model,
-            messages    = [{"role": role, "content": prompt}],
-            temperature = temperature,
-            top_p       = top_p,
-            max_tokens  = max_tokens,
-        )
+Analyze every contract clause individually against the provided jurisdiction-specific legal reference.
+This is an academic issue-spotting tool, not legal advice.
 
-        return response.choices[0].message.content
+Critical rules:
+1. Use the exact clause text from the contract.
+2. Do not invent Acts, sections, cases, rules, legal duties, or legal requirements.
+3. A legal authority may be cited only if it appears in the provided legal reference.
+4. If the contract has blanks or placeholders such as "(Date)", "(Amount)", "(Address)", "(Starting Date of Agreement)", "(Expiry Date of Agreement)", "(Amount of rent in Numbers)", or "(city)", classify that as Missing Required Information or Ambiguous. Do not cite a statute or call it non-compliant only because the field is blank. Cite a statute only when the actual clause text conflicts with a specific legal requirement in the provided reference.
+5. Distinguish these categories carefully: legal non-compliance, missing required information, ambiguity, practical risk, unfairness, and ordinary low-risk drafting.
+6. Do not flag a clause as non-compliant based on a hypothetical fact that contradicts the clause.
+7. When applicability depends on facts not present in the contract, say "Applicability uncertain" and explain what fact is missing.
+8. For every possible legal issue, explain exactly which legal source applies, what that source requires, and what part of the clause conflicts with it. If the issue is only missing dates, missing rent amount, missing address, missing city, or another blank placeholder, use Legal Authority: None unless the legal reference directly requires that exact missing field.
+9. Respond in English.
+10. Do not provide legal advice. Provide academic issue spotting only.
 
-    # Function to conduct few shot learning to classify "risky" clauses
-    def few_shot_learning(comparison, risky_clauses_text):
+Return exactly this format for every clause:
+
+Clause: "[EXACT FULL CLAUSE TEXT]"
+Legal Authority: [Exact Act and section from the reference, or "None"]
+Preliminary Legal Finding: [Compliant / Missing Information / Ambiguous / Practical Risk / Potentially Non-Compliant / Applicability Uncertain]
+Reasoning: [Concise explanation comparing the clause to the cited source. If no source applies, explain the drafting issue without calling it illegal.]
+
+Contract Clauses:
+{contract}
+
+Jurisdiction-Specific Legal Reference:
+{laws}
+"""
+        return call_llm(prompt)
+
+    def classify_risk(source_backed_analysis: str, risk_guidance: str) -> str:
         prompt = f"""
-                  You are a contract language specialist.
-                  Having compared a Chinese contract against a set of regulations, you've identified the following:
-                  {comparison}
+You are converting source-backed contract analysis into the final UI output.
+Respond in English.
 
-                  YOUR TASK:
-                  Provide all explanations and guidance BILINGUALLY in both English and Chinese.
+Use the source-backed analysis below:
 
-                  1. Risk Tier Assignment:
-                     - High Risk (高风险): Clearly violates law in common scenarios
-                     - Medium Risk (中风险): Potentially problematic in some contexts
-                     - Low Risk (低风险): Generally compliant but needs monitoring
-                
-                  2. Contextual Classification:
-                     - For each clause, specify bilingually:
-                       * "Enforceable in [specific contexts] (在[特定背景]下可执行)"
-                       * OR "Unenforceable under [specific conditions] (在[特定条件]下不可执行)"
-                     - Note any exception cases in both languages.
-                     
-                  3. Improvement Framework:
-                    - For medium/high risk clauses, suggest:
-                      Alternative phrasing options in both English and Chinese.
-                    - For low risk clauses:
-                      No changes needed (无需修改).
+{source_backed_analysis}
 
-                  Output Format:
-                  - Clause: The full text of the clause.
-                  - Regulation(s) Implicated: The exact regulation(s) or criteria implicated (if unenforceable). Provide in English & Chinese.
-                  - Classification: Either `Enforceable (可执行)` or `Unenforceable (不可执行)`. Include bilingual contextual conditions.
-                  - Risk Tier: [High Risk (高风险)/Medium Risk (中风险)/Low Risk (低风险)]
-                  - Explanation of Classification: A clear bilingual explanation of why the clause was classified as enforceable or unenforceable. If one-sided, mention this in both languages.
-                  - Improvement Guidance: [Actionable steps in English] [Actionable steps in Chinese]
-                  
-                  Rules:
-                  1. Always include the exact clause text in quotes after "Clause:"
-                  2. Never create titles or summarize clauses - use them exactly as written
-                  3. If uncertain about compliance, state this in the reasoning
-                  4. Never combine clauses - analyze each separately
-                  5. Include all clauses, even compliant ones
-                  6. Preserve all numbers and names exactly as written
-                  """
+Assign one classification and one risk tier to every clause.
 
-        response = client.chat.completions.create(
-            model       = model,
-            messages    = [{"role": role, "content": prompt}],
-            temperature = temperature,
-            top_p       = top_p,
-            max_tokens  = max_tokens,
-        )
+Allowed classifications:
+- Enforceable
+- Missing Required Information
+- Ambiguous
+- Potentially Prejudicial
+- Potentially Unenforceable
+- Requires Further Legal Review
 
-        return response.choices[0].message.content
+Allowed risk tiers:
+- High Risk
+- Medium Risk
+- Low Risk
 
-    def language_detection(comparison):
-        prompt = f"""You are provided with a list of Chinese contract clauses:
-                     {comparison}
-                     For each clause, the following fields are included:
-                     - Clause:
-                     - Regulation(s) Implicated:
-                     - Classification:
-                     - Risk Tier:
-                     - Explanation of Classification:
-                     - Improvement Guidance:
-                     
-                     YOUR TASK:
-                     ALL YOUR OUTPUT AND EXPLANATIONS MUST BE IN CHINESE.
-                     
-                     - For all clauses, reproduce all the provided fields in the output. Translate the field values into Chinese if they are not already.
-                     - If a clause is classified as unenforceable, analyze it to determine whether it exhibits any of the following linguistic flaws:
-                  1. Lexical Ambiguity (词汇模糊)
-                  2. Syntactic Ambiguity (语法模糊)
-                  3. Undue Generality (过分宽泛)
-                  4. Redundancy (冗余)
-                  5. None of these traits (None/无)
-                  
-                  Analyze EACH CLAUSE individually.
-                  Do not combine clauses. If a clause has multiple traits, list all applicable traits.
-                  Provide an explanation for your choice for EACH CLAUSE that exhibits a trait.
-                  The explanation MUST be in both English and Chinese.
-                  If the clause does not exhibit any trait, write "Not applicable (不适用)".
+Rules:
+1. Preserve the exact clause text.
+2. Do not invent legal authorities.
+3. Use "Legal Authority: None" unless the authority is expressly cited in the source-backed analysis.
+4. Treat unresolved placeholders as Missing Required Information, not as legal violations.
+5. Use High Risk only for a clause that the source-backed analysis identifies as potentially non-compliant or potentially unenforceable with a cited legal authority, or for a serious rights-remedy issue requiring legal review.
+6. Use Medium Risk for missing information, ambiguity, practical risk, or potentially prejudicial wording.
+7. Use Low Risk for standard clauses that are clear and not flagged by the legal reference.
+8. For each flagged clause, state: the law or absence of law, what is wrong or missing, and how to fix it.
+9. If a clause says the agreement will be registered, do not describe it as saying registration is unnecessary.
+10. This is academic issue spotting, not legal advice.
 
-                  Format your response EXACTLY as follows for each clause:
-                  Clause: "[Full text of the clause exactly as provided]"
-                  Trait: [Trait 1], [Trait 2], ...
-                  Explanation: [Bilingual reasoning for trait selection, or "Not applicable (不适用)"]
-                  """
+Additional risk guidance:
+{risk_guidance}
 
-        response = client.chat.completions.create(
-            model       = model,
-            messages    = [{"role": role, "content": prompt}],
-            temperature = temperature,
-            top_p       = top_p,
-            max_tokens  = max_tokens,
-        )
+Return exactly this format for every clause:
 
-        return response.choices[0].message.content
+Clause: "[EXACT FULL CLAUSE TEXT]"
+Legal Authority: [Exact Act and section, or "None"]
+Classification: [One allowed classification]
+Risk Tier: [High Risk / Medium Risk / Low Risk]
+Explanation: [Source-backed explanation. If this is not a legal violation, say it is a drafting or practical issue.]
+Improvement Guidance: [Specific revision or review step]
+"""
+        return call_llm(prompt)
 
-    # Read the contract file
-    contract_text = read_pdf_pymupdf(contract_path)
+    contract_text = read_document(contract_path)
+    clauses = extract_info(contract_text=contract_text)
+    regulations_text = read_document(law_path)
 
-    ##############################################################
-    ######### Include Code to split clauses into batches #########
-    ##############################################################
+    if risky_clauses and os.path.exists(risky_clauses):
+        risk_guidance_text = read_document(risky_clauses)
+    else:
+        risk_guidance_text = ""
 
-    # Unpack the list into a string
-    risky_clauses_text = ""
-    # for item in loaded_data:
-    #     risky_clauses_text += item + ('\n\n' if 'Combination:' in item else '\n')
+    source_backed = law_comparison(clauses, regulations_text)
+    return classify_risk(source_backed, risk_guidance_text)
 
-    # Read the regulation file
-    regulations_text = read_pdf_pymupdf(law_path)
-
-    clauses = extract_info(contract_text = contract_text)
-
-    comparison1 = law_comparison(clauses, regulations_text)
-    comparison2 = few_shot_learning(comparison1, risky_clauses_text)
-    comparison3 = language_detection(comparison2)
-
-    return comparison3
 
 if __name__ == "__main__":
-    final_evaluation  = clause_comparison(
-        contract_path = "example_contract.pdf",
-        law_path      = "example_regulations.txt",
-        risky_clauses = "example_risky_clauses.txt",
-        model         = "deepseek-chat",
-        role          = "user",
-        api_key       = os.environ.get("OPENAI_API_KEY", "YOUR_API_KEY_HERE"),
-        api_base      = "https://api.deepseek.com",
-        temperature   = 0.3,
-        top_p         = 0.1,
-        max_tokens    = 8192
+    final_evaluation = clause_comparison(
+        contract_path="example_contract.pdf",
+        law_path="example_regulations.txt",
+        risky_clauses="example_risk_guidance.txt",
+        model=os.environ.get("LLM_MODEL", "gpt-4o-mini"),
+        role="user",
+        api_key=os.environ.get("OPENAI_API_KEY", "YOUR_API_KEY_HERE"),
+        api_base=os.environ.get("OPENAI_API_BASE", "https://api.openai.com/v1"),
+        temperature=0.3,
+        top_p=0.1,
+        max_tokens=8192,
     )
     print(final_evaluation)

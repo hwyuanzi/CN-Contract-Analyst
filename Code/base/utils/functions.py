@@ -1,16 +1,39 @@
+from pathlib import Path
 import fitz
 import re
 
-def read_pdf_pymupdf(file_path):
+from pathlib import Path
+
+import fitz
+
+
+def read_document(file_path: str) -> str:
     """
-    Reads the contents of a PDF file and returns the extracted text.
+    Read supported PDF or plain-text files and return their text.
     """
-    text = ""
-    with fitz.open(file_path) as pdf:
-        for page_num in range(pdf.page_count):
-            page = pdf[page_num]
-            text += page.get_text()
-    return text
+    if not file_path:
+        raise ValueError("A file path is required.")
+
+    path = Path(file_path)
+
+    if not path.exists():
+        raise FileNotFoundError(f"File not found: {path}")
+
+    suffix = path.suffix.lower()
+
+    if suffix == ".pdf":
+        text_parts: list[str] = []
+
+        with fitz.open(path) as pdf:
+            for page in pdf:
+                text_parts.append(page.get_text())
+
+        return "\n".join(text_parts).strip()
+
+    if suffix in {".txt", ".md"}:
+        return path.read_text(encoding="utf-8").strip()
+
+    raise ValueError(f"Unsupported file type: {suffix}")
 
 def extract_info(document, prompt, client, model, role, temperature, top_p, max_tokens):
     """

@@ -1,0 +1,36 @@
+ENGLAND AND WALES RESIDENTIAL LEASE RISK GUIDANCE
+
+Classify issues carefully.
+
+High Risk:
+- A clause allows lockout, seizure of belongings, utility shutoff, or eviction without court/legal process.
+- A clause shifts all structural, exterior, sanitation, heating, water, gas, or electrical-installation repair obligations to the tenant in a way that may conflict with Landlord and Tenant Act 1985 - Section 11.
+- A clause attempts to exclude habitability obligations or makes the tenant responsible for serious pre-existing housing-condition defects.
+- A tenancy deposit clause appears to omit deposit protection requirements for an assured shorthold tenancy.
+- A clause imposes a prohibited or excessive payment, fee, or deposit under Tenant Fees Act 2019 - Schedule 1.
+- A clause is heavily one-sided and may create a significant imbalance under Consumer Rights Act 2015 - Section 62.
+
+Medium Risk:
+- The clause has unresolved placeholders such as names, dates, rent amount, deposit amount, property address, or city.
+- The lease duration is unclear.
+- The rent, payment date, payment method, or late-payment consequences are unclear.
+- The deposit clause lacks return timing, deduction standards, inventory procedure, or dispute process.
+- The landlord access clause lacks notice requirements or reasonable access limits.
+- The repair clause does not distinguish landlord statutory repairs, tenant minor repairs, tenant-caused damage, and ordinary wear and tear.
+- The termination clause lacks notice period, grounds, or consequences.
+- The jurisdiction or dispute-resolution clause is blank or unclear.
+
+Low Risk:
+- The clause is standard, specific, and does not create a legal or practical concern based on the provided legal reference.
+
+Important output rule:
+Do not call a clause illegal unless a cited legal source supports that conclusion. For template blanks, use Missing Required Information. For practical drafting concerns, explain that the issue is ambiguity or practical risk rather than legal invalidity.
+
+Deposit guidance:
+For deposit clauses, check whether the clause mentions protection in an authorised tenancy deposit scheme, return timing, permitted deductions, inventory/check-out evidence, and dispute handling. If the tenancy type is unclear, say applicability is uncertain.
+
+Repair guidance:
+For repair clauses, do not treat ordinary tenant minor-repair duties as unlawful. Flag only if the clause appears to transfer statutory landlord obligations for structure, exterior, sanitation, heating, water, gas, or electrical installations entirely to the tenant.
+
+Fees guidance:
+For fees, distinguish ordinary rent/utilities/council tax from administrative fees, cleaning fees, renewal fees, excessive default charges, or unusually high deposits.

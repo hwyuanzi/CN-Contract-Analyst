@@ -1,0 +1,54 @@
+ENGLAND AND WALES RESIDENTIAL RENTAL AGREEMENT LEGAL REFERENCE
+
+Use this file only as an academic baseline. Do not treat every listed rule as automatically applicable to every tenancy. If applicability depends on whether the tenancy is an assured shorthold tenancy, lease length, deposit amount, rent amount, premises type, or facts not present in the agreement, state that applicability is uncertain.
+
+1. Law of Property Act 1925 - Section 52
+Conveyances of land or any interest in land generally must be made by deed unless another legal rule provides an exception.
+
+Use this source for clauses involving execution formalities, deeds, long leases, or creation of legal interests in land. Do not cite this source merely because a template has blanks.
+
+2. Law of Property Act 1925 - Section 54
+Certain short leases taking effect in possession may be created without a deed when they are for a term not exceeding three years, at the best rent reasonably obtainable, and without taking a fine.
+
+Use this source when assessing whether a short residential tenancy may avoid deed formalities. If the lease duration is blank, classify the issue as Missing Required Information with Legal Authority: None.
+
+3. Landlord and Tenant Act 1985 - Section 11
+For short residential leases, the landlord has repairing obligations for the structure and exterior of the dwelling and installations for water, gas, electricity, sanitation, space heating, and heating water.
+
+Use this source when a clause shifts structural repairs, exterior repairs, sanitation, heating, water, gas, or electrical installations entirely to the tenant. Do not use this source for ordinary minor repairs or tenant-caused damage unless the clause conflicts with the landlord's statutory repairing obligations.
+
+4. Landlord and Tenant Act 1985 - Sections 8 to 10
+Residential premises must be fit for human habitation. Fitness can involve repair, stability, damp, internal arrangement, natural lighting, ventilation, water supply, drainage, sanitary conveniences, facilities for preparing and cooking food, and waste-water disposal.
+
+Use this source when a clause attempts to exclude landlord responsibility for habitability or serious housing-condition issues.
+
+5. Housing Act 2004 - Section 213
+When a landlord receives a tenancy deposit for an assured shorthold tenancy, the deposit must be dealt with under an authorised tenancy deposit scheme, and required information must be given to the tenant within the applicable deadline.
+
+Use this source for clauses involving tenancy deposits, deposit protection, deposit return, deductions, or failure to mention protection. If the contract does not state whether the tenancy is an assured shorthold tenancy, state applicability uncertain.
+
+6. Tenant Fees Act 2019 - Schedule 1
+For relevant English tenancies, permitted payments include rent, tenancy deposit, holding deposit, certain default payments, payments on variation/assignment/novation, early termination payments, utilities, communication services, TV licence, and council tax. A tenancy deposit is generally capped by reference to weekly rent.
+
+Use this source for clauses imposing administrative fees, cleaning fees, renewal fees, excessive default fees, or unusually high deposits. State applicability uncertainty if the tenancy type or rent amount is missing.
+
+7. Protection from Eviction Act 1977 - Section 1
+A landlord must not unlawfully deprive a residential occupier of occupation of the premises or attempt to do so. Harassment and unlawful eviction risks may arise from clauses allowing lockout, removal of belongings, utility shutoff, or self-help eviction.
+
+Use this source for clauses allowing eviction, lockout, seizure of belongings, disconnection of services, or removal without court/legal process.
+
+8. Consumer Rights Act 2015 - Section 62
+An unfair term in a consumer contract is not binding on the consumer. A term may be unfair if, contrary to good faith, it causes a significant imbalance in the parties' rights and obligations to the detriment of the consumer.
+
+Use this source for one-sided clauses, broad penalty clauses, excessive discretion, non-refundable charges, or terms that heavily restrict tenant rights without a clear justification.
+
+9. Legal source requirement
+For every clause classified as potentially non-compliant, potentially unenforceable, or requiring legal review:
+- cite the exact Act and section from this reference;
+- explain what the source requires;
+- identify the specific contract language that may conflict with it;
+- state uncertainty when the agreement does not provide enough facts;
+- do not invent additional statutes, sections, cases, or legal rules.
+
+10. Placeholder rule
+Do not cite a statute merely because a clause contains blanks such as "(Date)", "(Amount)", "(Address)", "(Landlord)", "(Tenant)", "(Property)", or "(city)". Classify blank placeholders as Missing Required Information or Ambiguous with Legal Authority: None unless the cited source directly requires that exact missing information.

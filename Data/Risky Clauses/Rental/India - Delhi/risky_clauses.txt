@@ -1,0 +1,27 @@
+INDIA - DELHI RESIDENTIAL LEASE RISK GUIDANCE
+
+Classify issues carefully.
+
+High Risk:
+- A clause directly contradicts a cited legal requirement.
+- A lease exceeding one year states or implies registration is unnecessary.
+- A clause allows lockout, seizure of belongings, immediate eviction, or private enforcement without legal process.
+- A clause allows essential services such as water or electricity to be disconnected as a private remedy.
+- A clause contains a penalty or damages formula that may be disproportionate under Indian Contract Act, 1872, Section 74. For these clauses, do not say the amount must be limited to ordinary rent. Explain that the amount should be framed as reasonable compensation, supported by expected loss, and subject to legal review.
+
+Medium Risk:
+- The clause has unresolved placeholders such as names, dates, amounts, addresses, lease duration, or city.
+- The clause is ambiguous about financial obligations, payment methods, maintenance charges, utilities, or refund timing.
+- The security deposit clause lacks itemized deduction procedures.
+- The landlord access clause lacks a notice requirement.
+- The termination clause lacks grounds, method of notice, or consequences of early termination.
+- The repair clause does not clearly distinguish minor repairs, structural repairs, tenant-caused damage, and ordinary wear and tear.
+
+Low Risk:
+- The clause is standard, specific, and does not create a legal or practical concern based on the provided legal reference.
+
+Section 74 guidance:
+For liquidated damages, penalty, holdover rent, or double-rent clauses, the improvement guidance should say that the amount should be tied to reasonable compensation or expected loss. Do not state that the amount must not exceed ordinary rent unless the legal reference specifically says that.
+
+Important output rule:
+Do not call a clause illegal unless a cited legal source supports that conclusion. For template blanks, use Missing Required Information. For practical drafting concerns, explain that the issue is ambiguity or practical risk rather than legal invalidity.
