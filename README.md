@@ -2,7 +2,7 @@
 
 ContractNerd International is an academic contract-analysis prototype that uses large language models to review contracts across jurisdictions. The system helps identify clauses that may be incomplete, ambiguous, prejudicial, potentially unenforceable, or in need of further legal review.
 
-The application currently supports contract analysis across multiple jurisdictions, including China-based jurisdictions and India - Delhi.
+The application currently supports contract analysis across multiple jurisdictions, including China-based jurisdictions, India - Delhi, and England and Wales.
 
 ## Overview
 
@@ -20,6 +20,9 @@ The current interface includes the following jurisdiction options:
 - Guangdong (广东)
 - Hefei (合肥)
 - India - Delhi
+- England and Wales
+
+Chinese jurisdictions can preserve Chinese-style output labels and analysis behavior, while India - Delhi and England and Wales use English output.
 
 ## Supported Contract Types
 
@@ -28,7 +31,7 @@ The current interface includes the following contract types:
 - Rental
 - Employment
 
-Rental agreement analysis is currently implemented for India - Delhi. Employment analysis depends on whether jurisdiction-specific data files are available for the selected jurisdiction.
+Rental agreement analysis is currently implemented for India - Delhi and England and Wales. Employment analysis depends on whether jurisdiction-specific data files are available for the selected jurisdiction.
 
 ## Features
 
@@ -41,6 +44,8 @@ Rental agreement analysis is currently implemented for India - Delhi. Employment
 - Legal authority display where applicable
 - Explanation of the clause issue
 - Improvement guidance for flagged clauses
+- Jurisdiction-aware output labels
+- Downloadable PDF report of final analysis
 - Copyable analysis results
 - Developer and team information page
 
@@ -58,7 +63,7 @@ For each clause, the system should try to explain:
 6. How the clause may conflict with or fail to satisfy that source.
 7. What revision or review step may improve the clause.
 
-The system should avoid treating ordinary template blanks as legal violations. For example, placeholders such as `(Date)`, `(Amount)`, `(Address)`, `(Starting Date of Agreement)`, `(Expiry Date of Agreement)`, `(Amount of rent in Numbers)`, or `(city)` should generally be treated as missing required information unless a specific legal source supports a stronger conclusion.
+The system should avoid treating ordinary template blanks as legal violations. For example, placeholders such as `(Date)`, `(Amount)`, `(Address)`, `(Starting Date of Agreement)`, `(Expiry Date of Agreement)`, `(Amount of rent in Numbers)`, `(Landlord)`, `(Tenant)`, `(Property)`, or `(city)` should generally be treated as missing required information unless a specific legal source supports a stronger conclusion.
 
 ## Output Format
 
@@ -83,6 +88,8 @@ The web interface displays:
 - Legal authority, where available
 - Explanation
 - Improvement guidance
+
+The final analysis can also be exported as a PDF report.
 
 ## Project Structure
 
@@ -144,6 +151,14 @@ Data/Regulations/Rental/India - Delhi/regulations.txt
 Data/Risky Clauses/Rental/India - Delhi/risky_clauses.txt
 ```
 
+The England and Wales rental workflow uses:
+
+```text
+Data/Gold Standards/Rental/England and Wales/gold_standard.txt
+Data/Regulations/Rental/England and Wales/regulations.txt
+Data/Risky Clauses/Rental/England and Wales/risky_clauses.txt
+```
+
 For employment analysis, the same structure should be used under `Employment` when jurisdiction-specific employment data is available:
 
 ```text
@@ -165,6 +180,32 @@ The regulations file contains jurisdiction-specific legal references used for so
 ### `risky_clauses.txt`
 
 The risky clauses file gives guidance for classifying contract language by risk level. It helps distinguish high-risk legal issues from medium-risk drafting problems and low-risk standard clauses.
+
+## Implemented Jurisdiction Notes
+
+### India - Delhi
+
+The India - Delhi rental workflow focuses on residential rental agreements. The current reference material includes selected rules from:
+
+- Transfer of Property Act, 1882
+- Registration Act, 1908
+- Indian Contract Act, 1872
+- Delhi Rent Control Act, 1958
+
+The workflow is designed to distinguish missing template information from actual legal issues. For example, blank dates, blank rent amounts, and blank city names should generally be treated as missing information unless the legal reference directly supports a stronger conclusion.
+
+### England and Wales
+
+The England and Wales rental workflow focuses on residential tenancy agreements. The current reference material includes selected rules from:
+
+- Law of Property Act 1925
+- Landlord and Tenant Act 1985
+- Housing Act 2004
+- Tenant Fees Act 2019
+- Protection from Eviction Act 1977
+- Consumer Rights Act 2015
+
+The workflow is designed to flag issues such as missing tenancy-deposit protection language, prohibited or excessive fees, improper transfer of statutory repair obligations, habitability exclusions, unlawful eviction or self-help remedies, and unfair consumer terms.
 
 ## Setup
 
@@ -211,6 +252,7 @@ http://127.0.0.1:5000
 5. Select the contract type.
 6. Click **Analyze Contract**.
 7. Review the clause-level output.
+8. Use **Copy** to copy the results or **Download PDF** to export the analysis report.
 
 For the India - Delhi demo, use:
 
@@ -218,6 +260,30 @@ For the India - Delhi demo, use:
 Jurisdiction: India - Delhi
 Contract Type: Rental
 ```
+
+For the England and Wales demo, use:
+
+```text
+Jurisdiction: England and Wales
+Contract Type: Rental
+```
+
+## PDF Export
+
+The frontend includes a **Download PDF** feature. After a contract is analyzed, the user can export the final analysis into a PDF report.
+
+The report includes:
+
+- Report title
+- Summary counts
+- Jurisdiction
+- Clause text
+- Risk tier
+- Legal authority
+- Explanation
+- Improvement guidance
+
+The export is generated from the rendered website output.
 
 ## Development Notes
 
@@ -257,8 +323,11 @@ The system should follow these principles:
 - State uncertainty when the applicable law depends on facts not present in the contract.
 - Explain the connection between the cited authority and the actual clause language.
 - Provide practical improvement guidance.
+- Use high-risk classification only when the issue is supported by the legal reference or involves a serious legal-review concern.
 
-For liquidated damages, penalty, holdover rent, or double-rent clauses, the analysis should explain the reasonable-compensation issue and should not automatically state that the amount must be limited to ordinary rent unless the legal reference specifically says so.
+For India - Delhi, liquidated damages, penalty, holdover rent, or double-rent clauses should be analyzed under the reasonable-compensation principle where applicable. The system should not automatically state that the amount must be limited to ordinary rent unless the legal reference specifically says so.
+
+For England and Wales, repair, deposit, fee, eviction, and unfair-term clauses should be analyzed against the jurisdiction-specific reference file. Ordinary tenant minor-repair duties should not be treated as unlawful unless they appear to transfer statutory landlord obligations to the tenant.
 
 ## Disclaimer
 
@@ -266,7 +335,7 @@ ContractNerd International is an academic research prototype. It is not legal ad
 
 ## Credits
 
-- India/Delhi Developer: Dhruv Pandoh
+- International Jurisdiction Developer: Dhruv Pandoh
 - Original App Developer: Haowen (Hollan) Yuan
 - Research Advisor: Professor Dennis Shasha
 - Paper Co-authors: Musonda Sinkala and Yuge Duan
